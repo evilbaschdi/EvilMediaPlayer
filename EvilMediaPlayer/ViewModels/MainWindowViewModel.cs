@@ -12,7 +12,7 @@ namespace EvilMediaPlayer.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase, IDisposable
 {
-    private readonly LibVLC _libVlc = new LibVLC();
+    private readonly LibVLC _libVlc;
 
     public MediaPlayer MediaPlayer { get; }
     public MediaBrowserViewModel MediaBrowserViewModel { get; }
@@ -67,8 +67,11 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
 
     public ICommand PlayPauseCommand { get; }
 
-    public MainWindowViewModel()
+    public MainWindowViewModel(LibVLC libVlc, MediaBrowserViewModel mediaBrowserViewModel)
     {
+        _libVlc = libVlc ?? throw new ArgumentNullException(nameof(libVlc));
+        MediaBrowserViewModel = mediaBrowserViewModel ?? throw new ArgumentNullException(nameof(mediaBrowserViewModel));
+
         _libVlc.Log += (s, e) => System.Diagnostics.Debug.WriteLine($"VLC: {e.Level} {e.Message}");
         MediaPlayer = new MediaPlayer(_libVlc);
         MediaPlayer.Volume = 100;
@@ -90,7 +93,6 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
             this.RaisePropertyChanged(nameof(Position));
         };
 
-        MediaBrowserViewModel = new MediaBrowserViewModel(_libVlc);
         MediaBrowserViewModel.MediaSelected += PlayMedia;
 
         PlayPauseCommand = new RelayCommand(_ => PlayPause());

@@ -1,13 +1,19 @@
+using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using EvilMediaPlayer.DependencyInjection;
 using EvilMediaPlayer.ViewModels;
 using EvilMediaPlayer.Views;
+using Microsoft.Extensions.DependencyInjection;
+using EvilBaschdi.Core.Avalonia;
 
 namespace EvilMediaPlayer;
 
 public class App : Application
 {
+    public static IServiceProvider ServiceProvider { get; private set; }
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -15,25 +21,49 @@ public class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        var serviceCollection = new ServiceCollection();
+        
+        // Add EvilBaschdi Core Avalonia services if available via extension
+        // serviceCollection.AddAvaloniaServices(); 
+        
+        serviceCollection.AddWindowsAndViewModels();
+
+        ServiceProvider = serviceCollection.BuildServiceProvider();
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow
-                                 {
-                                     DataContext = new MainWindowViewModel()
-                                 };
+            var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
+            mainWindow.DataContext = ServiceProvider.GetRequiredService<MainWindowViewModel>();
 
+            // Apply EvilBaschdi styling helpers if they exist in the library
+            try
+            {
+                var handleOsDependentTitleBar = ServiceProvider.GetService<IHandleOsDependentTitleBar>();
+                handleOsDependentTitleBar?.RunFor(mainWindow);
+
+                var applicationLayout = ServiceProvider.GetService<IApplicationLayout>();
+                applicationLayout?.RunFor((mainWindow, true, true));
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"EvilBaschdi.Core.Avalonia helpers failed: {ex.Message}");
+            }
+
+            desktop.MainWindow = mainWindow;
             desktop.Exit += OnExit;
         }
 
         base.OnFrameworkInitializationCompleted();
     }
 
-    void OnExit(object sender, ControlledApplicationLifetimeExitEventArgs e)
+    private void OnExit(object sender, ControlledApplicationLifetimeExitEventArgs e)
     {
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        if (ServiceProvider is IDisposable disposable)
         {
-            var vm = (MainWindowViewModel)desktop.MainWindow?.DataContext;
-            vm?.Dispose();
+            disposable.Dispose();
         }
+        
+        var vm = ServiceProvider?.GetService<MainWindowViewModel>();
+        vm?.Dispose();
     }
 }

@@ -23,7 +23,7 @@ namespace EvilMediaPlayer.ViewModels
 
         public MediaBrowserViewModel(LibVLC libVlc)
         {
-            _libVlc = libVlc;
+            _libVlc = libVlc ?? throw new ArgumentNullException(nameof(libVlc));
             _dlnaService = new DlnaService(_libVlc);
             _dlnaService.DeviceAdded += OnDlnaDeviceAdded;
 
