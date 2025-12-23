@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Avalonia.Controls;
 using Avalonia.Input;
 using EvilMediaPlayer.ViewModels;
@@ -16,17 +16,15 @@ public partial class VideoPlayer : UserControl
     {
         if (DataContext is MainWindowViewModel vm)
         {
-            vm.Play();
+            //vm.Play();
         }
     }
 
     private void VideoViewOnPointerEntered(object sender, PointerEventArgs e)
     {
-        ControlsPanel.IsVisible = true;
     }
 
     private void VideoViewOnPointerExited(object sender, PointerEventArgs e)
     {
-        ControlsPanel.IsVisible = false;
     }
 }

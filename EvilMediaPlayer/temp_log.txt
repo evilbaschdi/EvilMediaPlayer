@@ -1,0 +1,10 @@
+MainWindowViewModel constructor started
+MainWindowViewModel constructor finished
+MainWindowViewModel constructor started
+MainWindowViewModel constructor finished
+MainWindowViewModel constructor started
+MainWindowViewModel constructor finished
+MainWindowViewModel constructor started
+MainWindowViewModel constructor finished
+MainWindowViewModel constructor started
+MainWindowViewModel constructor finished

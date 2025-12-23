@@ -1,7 +1,9 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sty="using:FluentAvalonia.Styling"
              x:Class="EvilMediaPlayer.App"
              xmlns:local="using:EvilMediaPlayer"
+             xmlns:converters="using:EvilMediaPlayer.Converters"
              RequestedThemeVariant="Default">
     <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
@@ -9,7 +11,13 @@
         <local:ViewLocator />
     </Application.DataTemplates>
 
+    <Application.Resources>
+        <converters:TimeConverter x:Key="TimeConverter" />
+        <converters:FolderIconConverter x:Key="FolderIconConverter" />
+        <converters:PlayPauseIconConverter x:Key="PlayPauseIconConverter" />
+    </Application.Resources>
+
     <Application.Styles>
-        <FluentTheme />
+        <sty:FluentAvaloniaTheme PreferUserAccentColor="True" />
     </Application.Styles>
 </Application>

@@ -1,31 +1,56 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vlc="clr-namespace:LibVLCSharp.Avalonia;assembly=LibVLCSharp.Avalonia"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
              xmlns:viewModels="clr-namespace:EvilMediaPlayer.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="EvilMediaPlayer.Views.VideoPlayer"
              DataContextChanged="OnDataContextChanged">
 
-    <Design.DataContext>
-        <viewModels:MainWindowViewModel />
-    </Design.DataContext>
+    <Grid RowDefinitions="Auto, *, Auto, Auto">
+        <StackPanel Grid.Row="0" Margin="10" Spacing="5">
+            <TextBlock Text="{Binding CurrentTrackName, FallbackValue='No Media Loaded'}" 
+                       Theme="{StaticResource TitleTextBlockStyle}" 
+                       HorizontalAlignment="Center"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap"/>
+        </StackPanel>
 
-    <Grid RowDefinitions="Auto, *, Auto">
-        <Label Grid.Row="0" HorizontalAlignment="Center">Video Player</Label>
+        <Border Grid.Row="1" Margin="10" CornerRadius="8" ClipToBounds="True" Background="Black" BoxShadow="0 4 12 0 #40000000">
+            <vlc:VideoView MediaPlayer="{Binding MediaPlayer}"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Stretch">
+            </vlc:VideoView>
+        </Border>
 
-        <vlc:VideoView Grid.Row="1" MediaPlayer="{Binding MediaPlayer}"
-                       HorizontalAlignment="Stretch"
-                       VerticalAlignment="Stretch"
-                       PointerEntered="VideoViewOnPointerEntered"
-                       PointerExited="VideoViewOnPointerExited">
-            <Panel Name="ControlsPanel">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" Background="#900000FF" Spacing="20">
-                    <Button Command="{Binding Play}" Margin="20">Play</Button>
-                    <Button Command="{Binding Stop}" Margin="20">Stop</Button>
-                </StackPanel>
-            </Panel>
-        </vlc:VideoView>
+        <!-- Progress Slider -->
+        <Grid Grid.Row="2" ColumnDefinitions="Auto, *, Auto" Margin="15,5">
+            <TextBlock Grid.Column="0" Text="{Binding Position, Converter={StaticResource TimeConverter}}" VerticalAlignment="Center" FontSize="12" Opacity="0.8"/>
+            <Slider Grid.Column="1" Margin="10,0" 
+                    Minimum="0" Maximum="{Binding Duration}" 
+                    Value="{Binding Position, Mode=TwoWay}" />
+            <TextBlock Grid.Column="2" Text="{Binding DurationText, FallbackValue='00:00:00'}" VerticalAlignment="Center" FontSize="12" Opacity="0.8"/>
+        </Grid>
+
+        <!-- CommandBar for Controls -->
+        <ui:CommandBar Grid.Row="3" HorizontalAlignment="Center" Margin="0,0,0,10" DefaultLabelPosition="Right">
+            <ui:CommandBar.PrimaryCommands>
+                <ui:CommandBarButton Command="{Binding Stop}" Label="Stop">
+                    <ui:CommandBarButton.IconSource>
+                        <ui:SymbolIconSource Symbol="Stop" />
+                    </ui:CommandBarButton.IconSource>
+                </ui:CommandBarButton>
+                
+                <ui:CommandBarSeparator />
+
+                <ui:CommandBarButton Command="{Binding PlayPauseCommand}" Label="Play/Pause" IsCompact="False">
+                    <ui:CommandBarButton.IconSource>
+                        <ui:SymbolIconSource Symbol="{Binding IsPlaying, Converter={StaticResource PlayPauseIconConverter}}" />
+                    </ui:CommandBarButton.IconSource>
+                </ui:CommandBarButton>
+            </ui:CommandBar.PrimaryCommands>
+        </ui:CommandBar>
     </Grid>
 </UserControl>

@@ -3,9 +3,50 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:EvilMediaPlayer.Views"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:ui="using:FluentAvalonia.UI.Controls"
+        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
         x:Class="EvilMediaPlayer.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
-        Title="LibVLCSharp.Avalonia.Sample">
-    <views:VideoPlayer />
+        Title="Evil Media Player"
+        TransparencyLevelHint="Mica"
+        Background="Transparent"
+        ExtendClientAreaToDecorationsHint="True"
+        WindowStartupLocation="CenterScreen">
+
+    <Panel Name="RootPanel">
+        <ExperimentalAcrylicBorder IsHitTestVisible="False">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial
+                    BackgroundSource="Digger"
+                    TintColor="Black"
+                    TintOpacity="0.7"
+                    MaterialOpacity="0.5" />
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
+
+        <Grid RowDefinitions="Auto, *">
+            <!-- Custom Title Bar / Header -->
+            <StackPanel Grid.Row="0" Height="40" Orientation="Horizontal" VerticalAlignment="Top" Margin="15,10,0,0" IsHitTestVisible="False">
+                <Image Source="/Assets/avalonia-logo.ico" Width="18" Height="18" VerticalAlignment="Center"/>
+                <TextBlock Text="EVIL MEDIA PLAYER" 
+                           VerticalAlignment="Center" 
+                           Margin="10,0,0,0" 
+                           FontSize="12"
+                           FontWeight="SemiBold"
+                           Opacity="0.6"/>
+            </StackPanel>
+
+            <Grid Grid.Row="1" ColumnDefinitions="300, 1, *" Margin="7">
+                <Border Grid.Column="0" Background="{DynamicResource LayerOnMicaBaseAltFillColorDefaultBrush}" CornerRadius="8" Padding="5">
+                    <views:MediaBrowser DataContext="{Binding MediaBrowserViewModel}"/>
+                </Border>
+
+                <GridSplitter Grid.Column="1" Background="Transparent" Width="1"/>
+
+                <Border Grid.Column="2" Background="{DynamicResource LayerOnMicaBaseAltFillColorDefaultBrush}" CornerRadius="8" Margin="7,0,0,0">
+                    <views:VideoPlayer DataContext="{Binding}"/>
+                </Border>
+            </Grid>
+        </Grid>
+    </Panel>
 </Window>

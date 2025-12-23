@@ -1,0 +1,41 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:models="clr-namespace:EvilMediaPlayer.Models"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
+             xmlns:viewmodels="clr-namespace:EvilMediaPlayer.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="450"
+             x:Class="EvilMediaPlayer.Views.MediaBrowser">
+    
+    <Grid RowDefinitions="Auto, *">
+        <TextBlock Grid.Row="0" Text="LIBRARY" 
+                   Theme="{StaticResource CaptionTextBlockStyle}" 
+                   Margin="15,15,15,5" 
+                   FontWeight="Bold" 
+                   Opacity="0.6" 
+                   LetterSpacing="0.1"/>
+        
+        <TreeView Grid.Row="1" ItemsSource="{Binding Items}" 
+                  Background="Transparent"
+                  Margin="5,0,5,5">
+            <TreeView.Styles>
+                <Style Selector="TreeViewItem">
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                    <Setter Property="MinHeight" Value="32" />
+                </Style>
+            </TreeView.Styles>
+            <TreeView.DataTemplates>
+                <TreeDataTemplate DataType="models:FileSystemItem"
+                                  ItemsSource="{Binding Children}">
+                    <StackPanel Orientation="Horizontal" Spacing="10" Background="Transparent" DoubleTapped="OnDoubleTapped" Height="30">
+                        <ui:SymbolIcon Symbol="{Binding IsDirectory, Converter={StaticResource FolderIconConverter}}" 
+                                       FontSize="16"
+                                       Foreground="{DynamicResource AccentFillColorDefaultBrush}"/>
+                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="13" />
+                    </StackPanel>
+                </TreeDataTemplate>
+            </TreeView.DataTemplates>
+        </TreeView>
+    </Grid>
+</UserControl>
