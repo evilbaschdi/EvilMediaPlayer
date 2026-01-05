@@ -1,27 +1,34 @@
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Interactivity;
 using EvilMediaPlayer.Models;
 using EvilMediaPlayer.ViewModels;
 
-namespace EvilMediaPlayer.Views
+namespace EvilMediaPlayer.Views;
+
+/// <inheritdoc />
+public partial class MediaBrowser : UserControl
 {
-    public partial class MediaBrowser : UserControl
+    /// <summary>
+    ///     Constructor
+    /// </summary>
+    public MediaBrowser()
     {
-        public MediaBrowser()
+        InitializeComponent();
+    }
+
+    private void OnDoubleTapped(object sender, RoutedEventArgs e)
+    {
+        // The double-tap handler is UI-specific glue logic: it translates a user gesture into a
+        // view-model action. Using DataContext pattern keeps the handler lightweight and makes it easy
+        // to unit-test the view model without UI interactions.
+        if (sender is not Control { DataContext: FileSystemItem item })
         {
-            InitializeComponent();
+            return;
         }
 
-        private void OnDoubleTapped(object sender, RoutedEventArgs e)
+        if (DataContext is MediaBrowserViewModel vm)
         {
-            if (sender is Control { DataContext: FileSystemItem item })
-            {
-                if (DataContext is MediaBrowserViewModel vm)
-                {
-                    vm.ExpandCommand.Execute(item);
-                }
-            }
+            vm.ExpandCommand.Execute(item);
         }
     }
 }

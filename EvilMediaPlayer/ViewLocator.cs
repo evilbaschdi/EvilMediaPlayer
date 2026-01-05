@@ -1,4 +1,3 @@
-using System;
 using System.Diagnostics.CodeAnalysis;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
@@ -32,6 +31,7 @@ public class ViewLocator : IDataTemplate
             return (Control)Activator.CreateInstance(type)!;
         }
 
+        // If no view type can be found fallback to a textual representation to aid debugging.
         return new TextBlock { Text = "Not Found: " + name };
     }
 

@@ -4,45 +4,57 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vlc="clr-namespace:LibVLCSharp.Avalonia;assembly=LibVLCSharp.Avalonia"
              xmlns:ui="using:FluentAvalonia.UI.Controls"
-             xmlns:viewModels="clr-namespace:EvilMediaPlayer.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="EvilMediaPlayer.Views.VideoPlayer"
-             DataContextChanged="OnDataContextChanged">
+             x:Class="EvilMediaPlayer.Views.MediaPlayerControl">
 
     <Grid RowDefinitions="Auto, *, Auto, Auto">
         <StackPanel Grid.Row="0" Margin="10" Spacing="5">
-            <TextBlock Text="{Binding CurrentTrackName, FallbackValue='No Media Loaded'}" 
-                       Theme="{StaticResource TitleTextBlockStyle}" 
+            <!-- ReSharper disable once Xaml.StaticResourceNotResolved -->
+            <TextBlock Text="{Binding CurrentTrackName, FallbackValue='No Media Loaded'}"
+                       Theme="{StaticResource TitleTextBlockStyle}"
                        HorizontalAlignment="Center"
                        TextAlignment="Center"
-                       TextWrapping="Wrap"/>
+                       TextWrapping="Wrap" />
         </StackPanel>
 
-        <Border Grid.Row="1" Margin="10" CornerRadius="8" ClipToBounds="True" Background="Black" BoxShadow="0 4 12 0 #40000000">
-            <vlc:VideoView MediaPlayer="{Binding MediaPlayer}"
-                           HorizontalAlignment="Stretch"
-                           VerticalAlignment="Stretch">
-            </vlc:VideoView>
+        <Border Grid.Row="1" Margin="10" ClipToBounds="True" Background="Transparent">
+            <!-- Show cover art for audio files, video for others -->
+            <Grid>
+                <!-- Audio cover art -->
+                <Image Source="{Binding CoverArt}"
+                       IsVisible="{Binding IsAudioFile}"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Stretch="Uniform"
+                       MaxWidth="400"
+                       MaxHeight="400" />
+
+                <!-- Video player -->
+                <vlc:VideoView MediaPlayer="{Binding MediaPlayer}"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Stretch"
+                               IsVisible="{Binding !IsAudioFile}" />
+            </Grid>
         </Border>
 
         <!-- Progress Slider -->
         <Grid Grid.Row="2" ColumnDefinitions="Auto, *, Auto" Margin="15,5">
-            <TextBlock Grid.Column="0" Text="{Binding Position, Converter={StaticResource TimeConverter}}" VerticalAlignment="Center" FontSize="12" Opacity="0.8"/>
-            <Slider Grid.Column="1" Margin="10,0" 
-                    Minimum="0" Maximum="{Binding Duration}" 
+            <TextBlock Grid.Column="0" Text="{Binding Position, Converter={StaticResource TimeConverter}}" VerticalAlignment="Center" FontSize="12" Opacity="0.8" />
+            <Slider Grid.Column="1" Margin="10,0"
+                    Minimum="0" Maximum="{Binding Duration}"
                     Value="{Binding Position, Mode=TwoWay}" />
-            <TextBlock Grid.Column="2" Text="{Binding DurationText, FallbackValue='00:00:00'}" VerticalAlignment="Center" FontSize="12" Opacity="0.8"/>
+            <TextBlock Grid.Column="2" Text="{Binding DurationText, FallbackValue='00:00:00'}" VerticalAlignment="Center" FontSize="12" Opacity="0.8" />
         </Grid>
 
         <!-- CommandBar for Controls -->
         <ui:CommandBar Grid.Row="3" HorizontalAlignment="Center" Margin="0,0,0,10" DefaultLabelPosition="Right">
             <ui:CommandBar.PrimaryCommands>
-                <ui:CommandBarButton Command="{Binding Stop}" Label="Stop">
+                <ui:CommandBarButton Command="{Binding StopCommand}" Label="Stop">
                     <ui:CommandBarButton.IconSource>
                         <ui:SymbolIconSource Symbol="Stop" />
                     </ui:CommandBarButton.IconSource>
                 </ui:CommandBarButton>
-                
+
                 <ui:CommandBarSeparator />
 
                 <ui:CommandBarButton Command="{Binding PlayPauseCommand}" Label="Play/Pause" IsCompact="False">

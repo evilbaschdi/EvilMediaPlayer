@@ -1,7 +1,6 @@
-﻿using System;
-using Avalonia;
-using ReactiveUI.Avalonia;
+﻿using Avalonia;
 using LibVLCSharp.Shared;
+using ReactiveUI.Avalonia;
 
 namespace EvilMediaPlayer;
 
@@ -12,15 +11,18 @@ class Program
     // yet and stuff might break.
     public static void Main(string[] args)
     {
+        // Determine native libvlc path based on process architecture so native libraries are loaded
+        // from a known location. We allow null to let LibVLC fallback to its platform defaults which
+        // simplifies distribution across platforms.
         string arch = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
-        string libVlcPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "libvlc", $"win-{arch}");
+        string libVlcPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "libvlc", $"win-{arch}");
 
-        if (!System.IO.Directory.Exists(libVlcPath))
+        if (!Directory.Exists(libVlcPath))
         {
             // If native arch binaries are missing, but we are on ARM64, we might be able to use x64 binaries if running under emulation.
             // However, a native ARM64 process CANNOT load x64 DLLs.
             // If the folder is missing, we let Core.Initialize() try its default logic or throw a better error.
-            libVlcPath = null; 
+            libVlcPath = null;
         }
 
         try
@@ -29,7 +31,8 @@ class Program
         }
         catch (VLCException)
         {
-            // Fallback to default search paths if explicit path failed
+            // Fallback to default search paths if explicit path failed. This makes startup robust when the
+            // application is installed in different layout or when native search paths work better.
             Core.Initialize();
         }
 

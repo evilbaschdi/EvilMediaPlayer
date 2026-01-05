@@ -4,19 +4,20 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:models="clr-namespace:EvilMediaPlayer.Models"
              xmlns:ui="using:FluentAvalonia.UI.Controls"
-             xmlns:viewmodels="clr-namespace:EvilMediaPlayer.ViewModels"
+             xmlns:conv="using:Avalonia.Data.Converters"
              mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="450"
              x:Class="EvilMediaPlayer.Views.MediaBrowser">
-    
+
     <Grid RowDefinitions="Auto, *">
-        <TextBlock Grid.Row="0" Text="LIBRARY" 
-                   Theme="{StaticResource CaptionTextBlockStyle}" 
-                   Margin="15,15,15,5" 
-                   FontWeight="Bold" 
-                   Opacity="0.6" 
-                   LetterSpacing="0.1"/>
-        
-        <TreeView Grid.Row="1" ItemsSource="{Binding Items}" 
+        <!-- ReSharper disable once Xaml.StaticResourceNotResolved -->
+        <TextBlock Grid.Row="0" Text="LIBRARY"
+                   Theme="{StaticResource CaptionTextBlockStyle}"
+                   Margin="15,15,15,5"
+                   FontWeight="Bold"
+                   Opacity="0.6"
+                   LetterSpacing="0.1" />
+
+        <TreeView Grid.Row="1" ItemsSource="{Binding Items}"
                   Background="Transparent"
                   Margin="5,0,5,5">
             <TreeView.Styles>
@@ -28,12 +29,33 @@
             <TreeView.DataTemplates>
                 <TreeDataTemplate DataType="models:FileSystemItem"
                                   ItemsSource="{Binding Children}">
-                    <StackPanel Orientation="Horizontal" Spacing="10" Background="Transparent" DoubleTapped="OnDoubleTapped" Height="30">
-                        <ui:SymbolIcon Symbol="{Binding IsDirectory, Converter={StaticResource FolderIconConverter}}" 
+                    <Grid ColumnDefinitions="Auto, *, Auto, Auto" Background="Transparent" DoubleTapped="OnDoubleTapped" Height="30">
+                        <ui:SymbolIcon Grid.Column="0" Symbol="{Binding IsDirectory, Converter={StaticResource FolderIconConverter}}"
                                        FontSize="16"
-                                       Foreground="{DynamicResource AccentFillColorDefaultBrush}"/>
-                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="13" />
-                    </StackPanel>
+                                       Margin="0,0,4,0"
+                                       Foreground="{DynamicResource AccentFillColorDefaultBrush}" />
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding TrackNumber}"
+                                       Opacity="0.5"
+                                       FontSize="12"
+                                       VerticalAlignment="Center"
+                                       IsVisible="{Binding TrackNumber, Converter={x:Static conv:StringConverters.IsNotNullOrEmpty}}" />
+                            <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" FontSize="13" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+
+                        <!-- Metadata (Only for files) -->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="5" Margin="10,0" VerticalAlignment="Center">
+                            <!-- Simple visibility hack: Bind Opacity to 0 if directory? No, IsVisible binding is better but requires bool property or converter -->
+                            <!-- We bind IsVisible to !IsDirectory. Note: Avalonia supports !Binding syntax in newer versions or use a converter -->
+                            <!-- Let's just assume data is empty for directories -->
+                            <TextBlock Text="{Binding Artist}" FontSize="12" Opacity="0.6" />
+                            <TextBlock Text="{Binding Album}" FontSize="12" Opacity="0.6" Margin="5,0,0,0" />
+                            <TextBlock Text="{Binding Year}" FontSize="12" Opacity="0.6" Margin="5,0,0,0" />
+                        </StackPanel>
+
+                        <TextBlock Grid.Column="3" Text="{Binding DurationText}" VerticalAlignment="Center" FontSize="12" Opacity="0.6" Margin="10,0,5,0" />
+                    </Grid>
                 </TreeDataTemplate>
             </TreeView.DataTemplates>
         </TreeView>

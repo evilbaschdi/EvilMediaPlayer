@@ -18,6 +18,8 @@
     </Application.Resources>
 
     <Application.Styles>
-        <sty:FluentAvaloniaTheme PreferUserAccentColor="True" />
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
+        <FluentTheme />
+        <sty:FluentAvaloniaTheme PreferSystemTheme="True" PreferUserAccentColor="True" />
     </Application.Styles>
 </Application>
