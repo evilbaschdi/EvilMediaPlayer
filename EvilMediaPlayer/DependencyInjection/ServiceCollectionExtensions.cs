@@ -1,3 +1,4 @@
+using EvilMediaPlayer.Services;
 using EvilMediaPlayer.ViewModels;
 using EvilMediaPlayer.Views;
 using LibVLCSharp.Shared;
@@ -26,6 +27,15 @@ public static class ServiceCollectionExtensions
         // LibVLC wraps native resources; sharing a single LibVLC instance prevents duplicate native
         // initializations and simplifies lifecycle management.
         serviceCollection.AddSingleton(_ => new LibVLC());
+
+        // Register domain services for separation of concerns (SOLID principles)
+        serviceCollection.AddSingleton<IArtworkService, ArtworkService>();
+        serviceCollection.AddSingleton<IMediaPathNormalizer, MediaPathNormalizer>();
+        serviceCollection.AddSingleton<IMediaMetadataService, MediaMetadataService>();
+        serviceCollection.AddSingleton<IMetadataFetcher, MetadataFetcher>();
+        serviceCollection.AddSingleton<ILocalFileService, LocalFileService>();
+        serviceCollection.AddSingleton<IDlnaService, DlnaService>();
+        serviceCollection.AddSingleton<IDlnaItemService, DlnaItemService>();
 
         // View models are application-level state holders in this design; registering them as singletons
         // avoids recreating their state when views are recreated.

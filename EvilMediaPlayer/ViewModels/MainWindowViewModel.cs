@@ -14,18 +14,19 @@ using ReactiveUI;
 namespace EvilMediaPlayer.ViewModels;
 
 /// <summary>
-///     Main window view-model that owns media playback concerns and UI-facing state.
+///     Main window view-model that coordinates media playback and UI state.
 /// </summary>
 /// <remarks>
-///     This view-model is responsible for coordinating LibVLC and UI state because media playback
-///     involves native resources and event callbacks that must be marshalled to the UI thread.
-///     Keeping this logic in the view-model centralizes lifecycle management (start/stop/dispose)
-///     and makes it easier to test or replace presentation without scattering native calls across views.
+///     This view-model is responsible for orchestrating playback and presenting UI state.
+///     It delegates domain logic to specialized services (artwork loading, path normalization, metadata parsing)
+///     to keep concerns separated and improve testability (SOLID principles).
 /// </remarks>
 public class MainWindowViewModel : ViewModelBase, IDisposable
 {
     private readonly LibVLC _libVlc;
-    private readonly AudioMetadataService _audioMetadataService;
+    private readonly IArtworkService _artworkService;
+    private readonly IMediaPathNormalizer _pathNormalizer;
+    private readonly IMediaMetadataService _metadataService;
 
     /// <summary>
     ///     The LibVLC-backed media player instance used by the view-model.
@@ -195,14 +196,24 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
     /// <summary>
     ///     Constructor
     /// </summary>
-    /// <param name="libVlc"></param>
-    /// <param name="mediaBrowserViewModel"></param>
+    /// <param name="libVlc">LibVLC instance for media playback</param>
+    /// <param name="mediaBrowserViewModel">Media browser view model</param>
+    /// <param name="artworkService">Service for loading artwork</param>
+    /// <param name="pathNormalizer">Service for normalizing media paths</param>
+    /// <param name="metadataService">Service for extracting media metadata</param>
     /// <exception cref="ArgumentNullException"></exception>
-    public MainWindowViewModel(LibVLC libVlc, MediaBrowserViewModel mediaBrowserViewModel)
+    public MainWindowViewModel(
+        LibVLC libVlc,
+        MediaBrowserViewModel mediaBrowserViewModel,
+        IArtworkService artworkService,
+        IMediaPathNormalizer pathNormalizer,
+        IMediaMetadataService metadataService)
     {
         _libVlc = libVlc ?? throw new ArgumentNullException(nameof(libVlc));
         MediaBrowserViewModel = mediaBrowserViewModel ?? throw new ArgumentNullException(nameof(mediaBrowserViewModel));
-        _audioMetadataService = new AudioMetadataService();
+        _artworkService = artworkService ?? throw new ArgumentNullException(nameof(artworkService));
+        _pathNormalizer = pathNormalizer ?? throw new ArgumentNullException(nameof(pathNormalizer));
+        _metadataService = metadataService ?? throw new ArgumentNullException(nameof(metadataService));
 
         // Log from LibVLC to help diagnose native/runtime issues during development.
         _libVlc.Log += (_, e) => Debug.WriteLine($"VLC: {e.Level} {e.Message}");
@@ -219,20 +230,19 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
         // Update duration and its textual representation when LibVLC reports a length change. This keeps UI display
         // in sync with the underlying media without requiring polling.
         MediaPlayer.LengthChanged += (_, e) =>
-                                     {
-                                         Duration = e.Length;
-                                         DurationText = TimeSpan.FromMilliseconds(e.Length).ToString(@"hh\:mm\:ss");
-                                     };
+        {
+            Duration = e.Length;
+            DurationText = TimeSpan.FromMilliseconds(e.Length).ToString(@"hh\:mm\:ss");
+        };
 
         // LibVLC raises time updates from native threads; update the position property and notify bindings.
         MediaPlayer.TimeChanged += (_, e) =>
-                                   {
-                                       _position = e.Time;
-                                       this.RaisePropertyChanged(nameof(Position));
-                                   };
+        {
+            _position = e.Time;
+            this.RaisePropertyChanged(nameof(Position));
+        };
 
-        // When the media browser selects an item, start playback. Centralizing this in view-model keeps
-        // the UI code thin and maintains separation of concerns.
+        // When the media browser selects an item, start playback.
         MediaBrowserViewModel.MediaSelected += PlayMedia;
 
         PlayPauseCommand = ReactiveCommand.CreateFromTask(PlayPause);
@@ -270,9 +280,7 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
     /// <remarks>
     ///     This method is intentionally declared `async void` because it is used as an event handler
     ///     (MediaSelected) and needs to start asynchronous work without returning a Task to the caller.
-    ///     Inside we normalize URIs, try to obtain artwork from multiple sources, and kick off LibVLC parsing
-    ///     so the UI can present accurate metadata. UI updates are dispatched to the UI thread to avoid
-    ///     threading issues from LibVLC callbacks.
+    ///     It delegates to specialized services for artwork loading and path normalization.
     /// </remarks>
     /// <param name="item"></param>
     public async void PlayMedia(FileSystemItem item)
@@ -283,74 +291,16 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
         }
 
         CurrentTrackName = $"{item.TrackNumber} {item.DisplayName} | {item.Artist} | {item.Album} ({item.Year})";
-        var path = item.Path;
-
-        // Reset state
         CoverArt = null;
 
-        // Check if item has pre-loaded artwork (e.g. from DLNA)
-        if (!string.IsNullOrEmpty(item.ArtworkUrl))
-        {
-            await Dispatcher.UIThread.InvokeAsync(async () =>
-                                                  {
-                                                      var art = await LoadCoverArtAsync(item.ArtworkUrl);
-                                                      if (art != null)
-                                                      {
-                                                          CoverArt = art;
-                                                      }
-                                                  });
-        }
+        await InitialArtworkLoadAsync(item);
 
-        // Check if this is an audio file and try to extract cover art (fallback/initial)
-        IsAudioFile = _audioMetadataService.IsAudioFile(path);
-        if (IsAudioFile)
-        {
-            var art = await _audioMetadataService.ExtractCoverArtAsync(path);
-            if (art != null)
-            {
-                CoverArt = art;
-            }
-        }
-
-        if (!path.StartsWith("http") && !path.StartsWith("upnp") && !path.StartsWith("file"))
-        {
-            try
-            {
-                path = new Uri(path).AbsoluteUri;
-            }
-            catch
-            {
-                // ignored
-            }
-        }
-
+        var path = _pathNormalizer.NormalizePath(item.Path);
         Debug.WriteLine($"Playing normalized: {path}");
+
         var media = new Media(_libVlc, path, FromType.FromLocation);
+        media.ParsedChanged += (_, e) => OnMediaParsed(e, media);
 
-        // Parse metadata asynchronously so we can inspect tracks and artwork without blocking playback startup.
-        // ParsedChanged runs on LibVLC threads, so UI updates are dispatched explicitly to the UI thread.
-        media.ParsedChanged += async (_, e) =>
-                               {
-                                   if (e.ParsedStatus == MediaParsedStatus.Done)
-                                   {
-                                       await Dispatcher.UIThread.InvokeAsync(async () =>
-                                                                             {
-                                                                                 // Update IsAudioFile based on actual tracks
-                                                                                 var tracks = media.Tracks;
-                                                                                 bool hasVideo = tracks.Any(t => t.TrackType == TrackType.Video);
-                                                                                 IsAudioFile = !hasVideo;
-
-                                                                                 // Try to get artwork from LibVLC
-                                                                                 var artworkUrl = media.Meta(MetadataType.ArtworkURL);
-                                                                                 if (!string.IsNullOrEmpty(artworkUrl) && CoverArt == null)
-                                                                                 {
-                                                                                     CoverArt = await LoadCoverArtAsync(artworkUrl);
-                                                                                 }
-                                                                             });
-                                   }
-                               };
-
-        // Start parsing asynchronously
         var parsedStatus = await media.Parse(MediaParseOptions.ParseNetwork | MediaParseOptions.ParseLocal);
 
         if (parsedStatus == MediaParsedStatus.Done)
@@ -361,38 +311,56 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
         }
     }
 
-    private async Task<Bitmap> LoadCoverArtAsync(string url)
+    /// <summary>
+    ///     Load artwork from the item's pre-loaded URL or extract from metadata.
+    /// </summary>
+    private async Task InitialArtworkLoadAsync(FileSystemItem item)
     {
-        try
+        // Check if item has pre-loaded artwork (e.g. from DLNA)
+        if (!string.IsNullOrEmpty(item.ArtworkUrl))
         {
-            // Support different URL schemes; prefer local files where possible to avoid network requests.
-            if (url.StartsWith("file://"))
+            var art = await Dispatcher.UIThread.InvokeAsync(() => _artworkService.LoadCoverArtAsync(item.ArtworkUrl));
+            if (art != null)
             {
-                var localPath = new Uri(url).LocalPath;
-                if (File.Exists(localPath))
-                {
-                    return new Bitmap(localPath);
-                }
+                CoverArt = art;
+                return;
             }
-            else if (url.StartsWith("http"))
-            {
-                using var client = new HttpClient();
-                var data = await client.GetByteArrayAsync(url);
-                using var stream = new MemoryStream(data);
-                return new Bitmap(stream);
-            }
-            else if (File.Exists(url)) // Plain path
-            {
-                return new Bitmap(url);
-            }
-        }
-        catch (Exception ex)
-        {
-            // Failures to load artwork should not block playback; log for diagnostics and continue.
-            Debug.WriteLine($"Failed to load cover art from {url}: {ex.Message}");
         }
 
-        return null;
+        // Check if this is an audio file and try to extract cover art (fallback)
+        IsAudioFile = _artworkService.IsAudioFile(item.Path);
+        if (IsAudioFile)
+        {
+            var art = await _artworkService.ExtractCoverArtAsync(item.Path);
+            if (art != null)
+            {
+                CoverArt = art;
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Handle completion of media metadata parsing.
+    /// </summary>
+    private async void OnMediaParsed(MediaParsedChangedEventArgs e, Media media)
+    {
+        if (e.ParsedStatus != MediaParsedStatus.Done)
+        {
+            return;
+        }
+
+        await Dispatcher.UIThread.InvokeAsync(async () =>
+        {
+            // Update IsAudioFile based on actual tracks
+            IsAudioFile = !_metadataService.HasVideoTracks(media);
+
+            // Try to get artwork from LibVLC
+            var artworkUrl = _metadataService.GetArtworkUrl(media);
+            if (!string.IsNullOrEmpty(artworkUrl) && CoverArt == null)
+            {
+                CoverArt = await _artworkService.LoadCoverArtAsync(artworkUrl);
+            }
+        });
     }
 
     /// <summary>
@@ -419,7 +387,9 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
     private async Task AboutWindowCommandAction()
     {
         var aboutWindow = DependencyInjectedApplication.ServiceProvider.GetRequiredService<AboutWindow>();
-        var mainWindow = Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop ? desktop.MainWindow : null;
+        var mainWindow = Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
+            ? desktop.MainWindow
+            : null;
         if (mainWindow != null)
         {
             await aboutWindow.ShowDialog(mainWindow);

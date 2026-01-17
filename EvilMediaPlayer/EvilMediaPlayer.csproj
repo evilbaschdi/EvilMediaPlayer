@@ -66,9 +66,4 @@
 		</Resource>
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Compile Update="Views\MediaPlayerControl.axaml.cs">
-	    <DependentUpon>MediaPlayerControl.axaml</DependentUpon>
-	  </Compile>
-	</ItemGroup>
 </Project>
