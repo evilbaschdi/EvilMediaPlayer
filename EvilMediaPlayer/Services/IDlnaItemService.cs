@@ -1,5 +1,4 @@
 using EvilMediaPlayer.Models;
-using LibVLCSharp.Shared;
 
 namespace EvilMediaPlayer.Services;
 

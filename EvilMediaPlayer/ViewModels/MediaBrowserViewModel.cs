@@ -113,12 +113,12 @@ public class MediaBrowserViewModel : ViewModelBase, IDisposable
     private FileSystemItem CreateItem(string name, string path, bool isDir, bool addDummy = true)
     {
         var item = new FileSystemItem
-        {
-            Name = name,
-            Path = path,
-            IsDirectory = isDir,
-            Children = isDir ? [] : null
-        };
+                   {
+                       Name = name,
+                       Path = path,
+                       IsDirectory = isDir,
+                       Children = isDir ? [] : null
+                   };
 
         if (isDir && addDummy)
         {
@@ -143,20 +143,20 @@ public class MediaBrowserViewModel : ViewModelBase, IDisposable
     private void OnDlnaDeviceAdded(Media media)
     {
         Dispatcher.UIThread.InvokeAsync(() =>
-        {
-            var dlnaRoot = Items.FirstOrDefault(i => i.Name == "DLNA Servers");
-            if (dlnaRoot != null)
-            {
-                // Check if already added
-                if (dlnaRoot.Children.Any(c => c != null && c.Path == media.Mrl))
-                {
-                    return;
-                }
+                                        {
+                                            var dlnaRoot = Items.FirstOrDefault(i => i.Name == "DLNA Servers");
+                                            if (dlnaRoot != null)
+                                            {
+                                                // Check if already added
+                                                if (dlnaRoot.Children.Any(c => c != null && c.Path == media.Mrl))
+                                                {
+                                                    return;
+                                                }
 
-                // Add device under the DLNA root. We prefer metadata title but fall back to MRL to remain robust.
-                dlnaRoot.Children.Add(CreateItem(media.Meta(MetadataType.Title) ?? media.Mrl, media.Mrl, true));
-            }
-        });
+                                                // Add device under the DLNA root. We prefer metadata title but fall back to MRL to remain robust.
+                                                dlnaRoot.Children.Add(CreateItem(media.Meta(MetadataType.Title) ?? media.Mrl, media.Mrl, true));
+                                            }
+                                        });
     }
 
     /// <summary>
@@ -199,11 +199,4 @@ public class MediaBrowserViewModel : ViewModelBase, IDisposable
     {
         item.OnExpanded += async fsItem => await Expand(fsItem);
     }
-
-    // Allowed media file extensions. Kept as a HashSet for fast lookup during directory scans.
-    private static readonly HashSet<string> AllowedExtensions =
-    [
-        ".mp3", ".m4a", ".flac", ".ogg", ".wma", ".aac", ".wav",
-        ".mp4", ".mkv", ".avi", ".mov", ".webm", ".wmv", ".mpg", ".mpeg", ".m4v"
-    ];
 }
