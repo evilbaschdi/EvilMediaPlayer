@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<ApplicationIcon>Assets\emp.ico</ApplicationIcon>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
@@ -21,6 +21,7 @@
 		<!--Avalonia doesen't support TrimMode=link currently,but we are working on that https://github.com/AvaloniaUI/Avalonia/issues/6892 -->
 		<TrimMode>copyused</TrimMode>
 		<TargetFramework>net10.0</TargetFramework>
+		<AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
 		<Version>$([System.DateTime]::UtcNow.ToString(yyyy.M.d.H))</Version>
 		<RuntimeIdentifier Condition="'$(Configuration)' == 'Debug'">win-x64</RuntimeIdentifier>
 	</PropertyGroup>
@@ -37,11 +38,6 @@
 		<PackageReference Include="Avalonia" />
 		<PackageReference Include="Avalonia.Desktop" />
 		<PackageReference Include="Avalonia.Themes.Fluent" />
-		<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-		<PackageReference Include="Avalonia.Diagnostics">
-			<IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
-			<PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
-		</PackageReference>
 		<PackageReference Include="EvilBaschdi.About.Avalonia" />
 		<PackageReference Include="EvilBaschdi.Core.Avalonia" />
 		<PackageReference Include="FluentAvaloniaUI" />

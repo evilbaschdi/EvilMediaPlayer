@@ -5,7 +5,9 @@
              xmlns:models="clr-namespace:EvilMediaPlayer.Models"
              xmlns:ui="using:FluentAvalonia.UI.Controls"
              xmlns:conv="using:Avalonia.Data.Converters"
+             xmlns:viewModels="clr-namespace:EvilMediaPlayer.ViewModels"
              mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="450"
+             x:DataType="viewModels:MediaBrowserViewModel"
              x:Class="EvilMediaPlayer.Views.MediaBrowser">
 
     <Grid RowDefinitions="Auto, *">
@@ -30,10 +32,10 @@
                 <TreeDataTemplate DataType="models:FileSystemItem"
                                   ItemsSource="{Binding Children}">
                     <Grid ColumnDefinitions="Auto, *, Auto, Auto" Background="Transparent" DoubleTapped="OnDoubleTapped" Height="30">
-                        <ui:SymbolIcon Grid.Column="0" Symbol="{Binding IsDirectory, Converter={StaticResource FolderIconConverter}}"
-                                       FontSize="16"
-                                       Margin="0,0,4,0"
-                                       Foreground="{DynamicResource AccentFillColorDefaultBrush}" />
+                        <ui:FASymbolIcon Grid.Column="0" Symbol="{Binding IsDirectory, Converter={StaticResource FolderIconConverter}}"
+                                         FontSize="16"
+                                         Margin="0,0,4,0"
+                                         Foreground="{DynamicResource AccentFillColorDefaultBrush}" />
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                             <TextBlock Text="{Binding TrackNumber}"

@@ -22,18 +22,18 @@ public class PlayPauseIconConverter : IValueConverter
     /// <param name="parameter">An optional parameter for converter logic (unused).</param>
     /// <param name="culture">The culture to use in the converter (unused).</param>
     /// <returns>
-    ///     Returns <see cref="Symbol.Pause" /> if playing,
-    ///     <see cref="Symbol.Play" /> otherwise. Defaults to Play if value is not a boolean.
+    ///     Returns <see cref="FASymbol.Pause" /> if playing,
+    ///     <see cref="FASymbol.Play" /> otherwise. Defaults to Play if value is not a boolean.
     /// </returns>
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         if (value is bool isPlaying)
         {
-            return isPlaying ? Symbol.Pause : Symbol.Play;
+            return isPlaying ? FASymbol.Pause : FASymbol.Play;
         }
 
         // Default to Play to indicate the control is ready to start playback when state is unknown.
-        return Symbol.Play;
+        return FASymbol.Play;
     }
 
     /// <summary>

@@ -3,8 +3,7 @@
              xmlns:sty="using:FluentAvalonia.Styling"
              x:Class="EvilMediaPlayer.App"
              xmlns:local="using:EvilMediaPlayer"
-             xmlns:converters="using:EvilMediaPlayer.Converters"
-             RequestedThemeVariant="Default">
+             xmlns:converters="using:EvilMediaPlayer.Converters">
     <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.DataTemplates>

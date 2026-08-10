@@ -1,10 +1,9 @@
-using Avalonia;
-using Avalonia.Controls;
+using FluentAvalonia.UI.Windowing;
 
 namespace EvilMediaPlayer.Views;
 
 /// <inheritdoc />
-public partial class MainWindow : Window
+public partial class MainWindow : FAAppWindow
 {
     /// <summary>
     ///     Constructor
@@ -17,10 +16,5 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-
-#if DEBUG
-
-        this.AttachDevTools();
-#endif
     }
 }

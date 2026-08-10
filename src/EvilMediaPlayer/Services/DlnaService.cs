@@ -50,7 +50,7 @@ public class DlnaService : IDlnaService
         }
 
         System.Diagnostics.Debug.WriteLine("DLNA: Starting discovery with 'upnp'...");
-        _mediaDiscoverer = new MediaDiscoverer(_libVlc, "upnp");
+        _mediaDiscoverer = new(_libVlc, "upnp");
 
         if (_mediaDiscoverer?.MediaList == null)
         {

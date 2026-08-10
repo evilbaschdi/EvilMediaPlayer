@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Reactive;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media.Imaging;
@@ -10,6 +9,7 @@ using EvilMediaPlayer.Services;
 using LibVLCSharp.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
+using ReactiveUI.Primitives;
 
 namespace EvilMediaPlayer.ViewModels;
 
@@ -173,7 +173,7 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
     ///     triggered by the command (e.g., UI updates or awaiting lib calls) is handled consistently and
     ///     command execution state can be observed by the UI framework.
     /// </remarks>
-    public ReactiveCommand<Unit, Unit> PlayPauseCommand { get; set; }
+    public ReactiveCommand<RxVoid, RxVoid> PlayPauseCommand { get; set; }
 
     /// <summary>
     ///     Stop command exposed to the view.
@@ -182,7 +182,7 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
     ///     Implemented as an async command for the same reasons as PlayPause: uniform async execution model
     ///     and easier integration with ReactiveCommand's throttling and UI binding semantics.
     /// </remarks>
-    public ReactiveCommand<Unit, Unit> StopCommand { get; set; }
+    public ReactiveCommand<RxVoid, RxVoid> StopCommand { get; set; }
 
     /// <summary>
     ///     Command that opens the About window.
@@ -191,7 +191,7 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
     ///     Keeping a command property (instead of directly opening windows from the view) preserves testability
     ///     and keeps UI-triggered actions in the view-model where lifetimes and DI resolution are handled.
     /// </remarks>
-    public ReactiveCommand<Unit, Unit> AboutWindowCommand { get; set; }
+    public ReactiveCommand<RxVoid, RxVoid> AboutWindowCommand { get; set; }
 
     /// <summary>
     ///     Constructor
@@ -217,7 +217,7 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
 
         // Log from LibVLC to help diagnose native/runtime issues during development.
         _libVlc.Log += (_, e) => Debug.WriteLine($"VLC: {e.Level} {e.Message}");
-        MediaPlayer = new MediaPlayer(_libVlc);
+        MediaPlayer = new(_libVlc);
         MediaPlayer.Volume = 100;
 
         // Map LibVLC playback events to a simple IsPlaying flag so views can react to playback state without
@@ -230,17 +230,17 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
         // Update duration and its textual representation when LibVLC reports a length change. This keeps UI display
         // in sync with the underlying media without requiring polling.
         MediaPlayer.LengthChanged += (_, e) =>
-        {
-            Duration = e.Length;
-            DurationText = TimeSpan.FromMilliseconds(e.Length).ToString(@"hh\:mm\:ss");
-        };
+                                     {
+                                         Duration = e.Length;
+                                         DurationText = TimeSpan.FromMilliseconds(e.Length).ToString(@"hh\:mm\:ss");
+                                     };
 
         // LibVLC raises time updates from native threads; update the position property and notify bindings.
         MediaPlayer.TimeChanged += (_, e) =>
-        {
-            _position = e.Time;
-            this.RaisePropertyChanged(nameof(Position));
-        };
+                                   {
+                                       _position = e.Time;
+                                       this.RaisePropertyChanged(nameof(Position));
+                                   };
 
         // When the media browser selects an item, start playback.
         MediaBrowserViewModel.MediaSelected += PlayMedia;
@@ -350,17 +350,17 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
         }
 
         await Dispatcher.UIThread.InvokeAsync(async () =>
-        {
-            // Update IsAudioFile based on actual tracks
-            IsAudioFile = !_metadataService.HasVideoTracks(media);
+                                              {
+                                                  // Update IsAudioFile based on actual tracks
+                                                  IsAudioFile = !_metadataService.HasVideoTracks(media);
 
-            // Try to get artwork from LibVLC
-            var artworkUrl = _metadataService.GetArtworkUrl(media);
-            if (!string.IsNullOrEmpty(artworkUrl) && CoverArt == null)
-            {
-                CoverArt = await _artworkService.LoadCoverArtAsync(artworkUrl);
-            }
-        });
+                                                  // Try to get artwork from LibVLC
+                                                  var artworkUrl = _metadataService.GetArtworkUrl(media);
+                                                  if (!string.IsNullOrEmpty(artworkUrl) && CoverArt == null)
+                                                  {
+                                                      CoverArt = await _artworkService.LoadCoverArtAsync(artworkUrl);
+                                                  }
+                                              });
     }
 
     /// <summary>

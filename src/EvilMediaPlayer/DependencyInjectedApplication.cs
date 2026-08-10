@@ -1,6 +1,6 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using EvilBaschdi.Core.Avalonia;
+using EvilBaschdi.Core.Avalonia.Themes;
 using EvilMediaPlayer.ViewModels;
 using EvilMediaPlayer.Views;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,17 +16,7 @@ public class DependencyInjectedApplication : Application
     ///     ServiceProvider for DependencyInjection
     /// </summary>
     // ReSharper disable once MemberCanBePrivate.Global
-    public static IServiceProvider ServiceProvider { get; protected set; }
-
-    /// <summary>
-    ///     Gets the underlying collection of service descriptors used for dependency injection configuration.
-    /// </summary>
-    /// <remarks>
-    ///     Use this property to register, configure, or inspect services within the application's
-    ///     dependency injection container. Changes to the collection affect service resolution throughout the application's
-    ///     lifetime.
-    /// </remarks>
-    protected IServiceCollection ServiceCollection { get; } = new ServiceCollection();
+    public static IServiceProvider ServiceProvider { get; set; }
 
     /// <summary>
     ///     Initializes the application using dependency injection, configuring the main window and its view model from the
@@ -56,11 +46,9 @@ public class DependencyInjectedApplication : Application
         // we catch and log them to preserve application startup.
         try
         {
-            var handleOsDependentTitleBar = ServiceProvider?.GetRequiredService<IHandleOsDependentTitleBar>();
-            handleOsDependentTitleBar?.RunFor(mainWindow);
+            ThemeEngine.Initialize(this);
 
-            var applicationLayout = ServiceProvider?.GetRequiredService<IApplicationLayout>();
-            applicationLayout?.RunFor((mainWindow, true, true));
+            ThemeEngine.ApplyThemeToWindow(mainWindow, true);
         }
         catch (Exception ex)
         {

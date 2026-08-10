@@ -8,7 +8,7 @@ namespace EvilMediaPlayer.Services;
 /// </summary>
 public class ArtworkService : IArtworkService
 {
-    private static readonly HttpClient HttpClient = new HttpClient();
+    private static readonly HttpClient HttpClient = new();
     private readonly AudioMetadataService _audioMetadataService;
 
     /// <summary>
@@ -16,7 +16,7 @@ public class ArtworkService : IArtworkService
     /// </summary>
     public ArtworkService()
     {
-        _audioMetadataService = new AudioMetadataService();
+        _audioMetadataService = new();
     }
 
     /// <inheritdoc />
@@ -30,18 +30,18 @@ public class ArtworkService : IArtworkService
                 var localPath = new Uri(url).LocalPath;
                 if (File.Exists(localPath))
                 {
-                    return new Bitmap(localPath);
+                    return new(localPath);
                 }
             }
             else if (url.StartsWith("http"))
             {
                 var data = await HttpClient.GetByteArrayAsync(url);
                 using var stream = new MemoryStream(data);
-                return new Bitmap(stream);
+                return new(stream);
             }
             else if (File.Exists(url)) // Plain path
             {
-                return new Bitmap(url);
+                return new(url);
             }
         }
         catch (Exception ex)
@@ -54,14 +54,8 @@ public class ArtworkService : IArtworkService
     }
 
     /// <inheritdoc />
-    public Task<Bitmap> ExtractCoverArtAsync(string filePath)
-    {
-        return _audioMetadataService.ExtractCoverArtAsync(filePath);
-    }
+    public Task<Bitmap> ExtractCoverArtAsync(string filePath) => _audioMetadataService.ExtractCoverArtAsync(filePath);
 
     /// <inheritdoc />
-    public bool IsAudioFile(string filePath)
-    {
-        return _audioMetadataService.IsAudioFile(filePath);
-    }
+    public bool IsAudioFile(string filePath) => _audioMetadataService.IsAudioFile(filePath);
 }

@@ -1,7 +1,9 @@
-<Solution>
+﻿<Solution>
   <Folder Name="/Solution Items/">
     <File Path="Directory.Packages.props" />
     <File Path="global.json" />
   </Folder>
-  <Project Path="EvilMediaPlayer/EvilMediaPlayer.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/EvilMediaPlayer/EvilMediaPlayer.csproj" />
+  </Folder>
 </Solution>

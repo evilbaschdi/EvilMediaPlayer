@@ -251,7 +251,7 @@ public class FileSystemItem : INotifyPropertyChanged
     /// <param name="propertyName">The name of the property that changed (auto-populated by CallerMemberName).</param>
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        PropertyChanged?.Invoke(this, new(propertyName));
     }
 
     /// <summary>

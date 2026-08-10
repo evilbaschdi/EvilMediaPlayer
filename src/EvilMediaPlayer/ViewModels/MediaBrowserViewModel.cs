@@ -1,10 +1,10 @@
 using System.Collections.ObjectModel;
-using System.Reactive;
 using Avalonia.Threading;
 using EvilMediaPlayer.Models;
 using EvilMediaPlayer.Services;
 using LibVLCSharp.Shared;
 using ReactiveUI;
+using ReactiveUI.Primitives;
 
 namespace EvilMediaPlayer.ViewModels;
 
@@ -38,7 +38,7 @@ public class MediaBrowserViewModel : ViewModelBase, IDisposable
     ///     Exposed as a ReactiveCommand so the UI can invoke it when a tree node is expanded. The command
     ///     routes to the Expand method which determines whether to load local or DLNA children based on the item's path.
     /// </remarks>
-    public ReactiveCommand<object, Unit> ExpandCommand { get; }
+    public ReactiveCommand<object, RxVoid> ExpandCommand { get; }
 
     /// <summary>
     ///     Event raised when the user selects a media file (not a directory).

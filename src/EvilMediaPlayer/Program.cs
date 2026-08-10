@@ -1,6 +1,8 @@
-﻿using Avalonia;
+using Avalonia;
+using EvilBaschdi.About.Avalonia.DependencyInjection;
+using EvilMediaPlayer.DependencyInjection;
 using LibVLCSharp.Shared;
-using ReactiveUI.Avalonia;
+using ReactiveUI.Avalonia.Splat;
 
 namespace EvilMediaPlayer;
 
@@ -46,5 +48,11 @@ class Program
                      .With(new SkiaOptions { MaxGpuResourceSizeBytes = 8096000 })
                      .LogToTrace()
                      .UseSkia()
-                     .UseReactiveUI();
+                     .UseReactiveUIWithMicrosoftDependencyResolver(
+                         serviceCollection =>
+                         {
+                             serviceCollection.AddAboutServices();
+                             serviceCollection.AddWindowsAndViewModels();
+                         },
+                         sp => { DependencyInjectedApplication.ServiceProvider = sp; });
 }

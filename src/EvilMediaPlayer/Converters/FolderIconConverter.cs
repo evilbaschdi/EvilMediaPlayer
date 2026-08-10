@@ -17,26 +17,26 @@ public class FolderIconConverter : IValueConverter
 {
     /// <summary>
     ///     Converts a boolean value indicating whether an item is a directory into a corresponding
-    ///     <see cref="Symbol" /> icon.
+    ///     <see cref="FASymbol" /> icon.
     /// </summary>
     /// <param name="value">A boolean indicating if the item is a directory (<c>true</c>) or a file (<c>false</c>).</param>
     /// <param name="targetType">The type of the binding target property.</param>
     /// <param name="parameter">An optional parameter to be used in the converter (not used).</param>
     /// <param name="culture">The culture to use in the converter.</param>
     /// <returns>
-    ///     <see cref="Symbol.Folder" /> if <paramref name="value" /> is <c>true</c>,
-    ///     <see cref="Symbol.Audio" /> if <paramref name="value" /> is <c>false</c>,
-    ///     or <see cref="Symbol.Help" /> if <paramref name="value" /> is not a boolean.
+    ///     <see cref="FASymbol.Folder" /> if <paramref name="value" /> is <c>true</c>,
+    ///     <see cref="FASymbol.Audio" /> if <paramref name="value" /> is <c>false</c>,
+    ///     or <see cref="FASymbol.Help" /> if <paramref name="value" /> is not a boolean.
     /// </returns>
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         if (value is bool isDir)
         {
-            return isDir ? Symbol.Folder : Symbol.Audio;
+            return isDir ? FASymbol.Folder : FASymbol.Audio;
         }
 
         // If we cannot determine the type, present a neutral icon so the UI signals unknown state.
-        return Symbol.Help;
+        return FASymbol.Help;
     }
 
     /// <summary>

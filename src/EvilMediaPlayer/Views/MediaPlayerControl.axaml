@@ -47,22 +47,22 @@
         </Grid>
 
         <!-- CommandBar for Controls -->
-        <ui:CommandBar Grid.Row="3" HorizontalAlignment="Center" Margin="0,0,0,10" DefaultLabelPosition="Right">
-            <ui:CommandBar.PrimaryCommands>
-                <ui:CommandBarButton Command="{Binding StopCommand}" Label="Stop">
-                    <ui:CommandBarButton.IconSource>
-                        <ui:SymbolIconSource Symbol="Stop" />
-                    </ui:CommandBarButton.IconSource>
-                </ui:CommandBarButton>
+        <ui:FACommandBar Grid.Row="3" HorizontalAlignment="Center" Margin="0,0,0,10" DefaultLabelPosition="Right">
+            <ui:FACommandBar.PrimaryCommands>
+                <ui:FACommandBarButton Command="{Binding StopCommand}" Label="Stop">
+                    <ui:FACommandBarButton.IconSource>
+                        <ui:FASymbolIconSource Symbol="Stop" />
+                    </ui:FACommandBarButton.IconSource>
+                </ui:FACommandBarButton>
 
-                <ui:CommandBarSeparator />
+                <ui:FACommandBarSeparator />
 
-                <ui:CommandBarButton Command="{Binding PlayPauseCommand}" Label="Play/Pause" IsCompact="False">
-                    <ui:CommandBarButton.IconSource>
-                        <ui:SymbolIconSource Symbol="{Binding IsPlaying, Converter={StaticResource PlayPauseIconConverter}}" />
-                    </ui:CommandBarButton.IconSource>
-                </ui:CommandBarButton>
-            </ui:CommandBar.PrimaryCommands>
-        </ui:CommandBar>
+                <ui:FACommandBarButton Command="{Binding PlayPauseCommand}" Label="Play/Pause" IsCompact="False">
+                    <ui:FACommandBarButton.IconSource>
+                        <ui:FASymbolIconSource Symbol="{Binding IsPlaying, Converter={StaticResource PlayPauseIconConverter}}" />
+                    </ui:FACommandBarButton.IconSource>
+                </ui:FACommandBarButton>
+            </ui:FACommandBar.PrimaryCommands>
+        </ui:FACommandBar>
     </Grid>
 </UserControl>
