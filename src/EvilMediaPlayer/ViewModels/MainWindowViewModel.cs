@@ -47,8 +47,6 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
     /// </remarks>
     public MediaBrowserViewModel MediaBrowserViewModel { get; }
 
-    private string _currentTrackName;
-
     /// <summary>
     ///     The current track display name shown in the UI.
     /// </summary>
@@ -58,11 +56,9 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
     /// </remarks>
     public string CurrentTrackName
     {
-        get => _currentTrackName;
-        set => this.RaiseAndSetIfChanged(ref _currentTrackName, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
-
-    private Bitmap _coverArt;
 
     /// <summary>
     ///     Cover artwork for the currently playing track.
@@ -73,11 +69,9 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
     /// </remarks>
     public Bitmap CoverArt
     {
-        get => _coverArt;
-        set => this.RaiseAndSetIfChanged(ref _coverArt, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
-
-    private bool _isAudioFile;
 
     /// <summary>
     ///     Indicates whether the currently loaded media is audio-only.
@@ -88,11 +82,9 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
     /// </remarks>
     public bool IsAudioFile
     {
-        get => _isAudioFile;
-        set => this.RaiseAndSetIfChanged(ref _isAudioFile, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
-
-    private long _duration;
 
     /// <summary>
     ///     Media duration in milliseconds as reported by LibVLC.
@@ -103,8 +95,8 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
     /// </remarks>
     public long Duration
     {
-        get => _duration;
-        set => this.RaiseAndSetIfChanged(ref _duration, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     private long _position;
@@ -135,8 +127,6 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
         }
     }
 
-    private string _durationText;
-
     /// <summary>
     ///     Human-readable duration string used for display (e.g., "hh:mm:ss").
     /// </summary>
@@ -146,11 +136,9 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
     /// </remarks>
     public string DurationText
     {
-        get => _durationText;
-        set => this.RaiseAndSetIfChanged(ref _durationText, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
-
-    private bool _isPlaying;
 
     /// <summary>
     ///     Whether media playback is currently active.
@@ -161,8 +149,8 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
     /// </remarks>
     public bool IsPlaying
     {
-        get => _isPlaying;
-        set => this.RaiseAndSetIfChanged(ref _isPlaying, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     /// <summary>

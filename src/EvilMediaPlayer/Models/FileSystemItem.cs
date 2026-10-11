@@ -16,8 +16,6 @@ namespace EvilMediaPlayer.Models;
 /// </remarks>
 public class FileSystemItem : INotifyPropertyChanged
 {
-    private string _name;
-
     /// <summary>
     ///     The file or directory name.
     /// </summary>
@@ -27,10 +25,10 @@ public class FileSystemItem : INotifyPropertyChanged
     /// </remarks>
     public string Name
     {
-        get => _name;
+        get;
         set
         {
-            if (SetProperty(ref _name, value))
+            if (SetProperty(ref field, value))
             {
                 // When the underlying name changes we also notify that the computed display name changed.
                 OnPropertyChanged(nameof(DisplayName));
@@ -47,8 +45,6 @@ public class FileSystemItem : INotifyPropertyChanged
     /// </remarks>
     public string DisplayName => !string.IsNullOrEmpty(Title) ? Title : Name;
 
-    private string _path;
-
     /// <summary>
     ///     Full path to the file or directory.
     /// </summary>
@@ -58,11 +54,9 @@ public class FileSystemItem : INotifyPropertyChanged
     /// </remarks>
     public string Path
     {
-        get => _path;
-        set => SetProperty(ref _path, value);
+        get;
+        set => SetProperty(ref field, value);
     }
-
-    private string _artworkUrl;
 
     /// <summary>
     ///     URL or path to cover artwork for this media item.
@@ -73,11 +67,9 @@ public class FileSystemItem : INotifyPropertyChanged
     /// </remarks>
     public string ArtworkUrl
     {
-        get => _artworkUrl;
-        set => SetProperty(ref _artworkUrl, value);
+        get;
+        set => SetProperty(ref field, value);
     }
-
-    private string _artist;
 
     /// <summary>
     ///     The artist or performer name extracted from media metadata.
@@ -88,11 +80,9 @@ public class FileSystemItem : INotifyPropertyChanged
     /// </remarks>
     public string Artist
     {
-        get => _artist;
-        set => SetProperty(ref _artist, value);
+        get;
+        set => SetProperty(ref field, value);
     }
-
-    private string _album;
 
     /// <summary>
     ///     The album name extracted from media metadata.
@@ -103,11 +93,9 @@ public class FileSystemItem : INotifyPropertyChanged
     /// </remarks>
     public string Album
     {
-        get => _album;
-        set => SetProperty(ref _album, value);
+        get;
+        set => SetProperty(ref field, value);
     }
-
-    private string _year;
 
     /// <summary>
     ///     The release year extracted from media metadata.
@@ -118,11 +106,9 @@ public class FileSystemItem : INotifyPropertyChanged
     /// </remarks>
     public string Year
     {
-        get => _year;
-        set => SetProperty(ref _year, value);
+        get;
+        set => SetProperty(ref field, value);
     }
-
-    private string _trackNumber;
 
     /// <summary>
     ///     The track number extracted from media metadata.
@@ -133,11 +119,9 @@ public class FileSystemItem : INotifyPropertyChanged
     /// </remarks>
     public string TrackNumber
     {
-        get => _trackNumber;
-        set => SetProperty(ref _trackNumber, value);
+        get;
+        set => SetProperty(ref field, value);
     }
-
-    private string _title;
 
     /// <summary>
     ///     The media title extracted from metadata (track, episode, content name, etc.).
@@ -148,18 +132,16 @@ public class FileSystemItem : INotifyPropertyChanged
     /// </remarks>
     public string Title
     {
-        get => _title;
+        get;
         set
         {
-            if (SetProperty(ref _title, value))
+            if (SetProperty(ref field, value))
             {
                 // Title affects DisplayName, so notify consumers when it changes.
                 OnPropertyChanged(nameof(DisplayName));
             }
         }
     }
-
-    private string _durationText;
 
     /// <summary>
     ///     Human-readable duration string (e.g., "mm:ss" or "hh:mm:ss").
@@ -170,11 +152,9 @@ public class FileSystemItem : INotifyPropertyChanged
     /// </remarks>
     public string DurationText
     {
-        get => _durationText;
-        set => SetProperty(ref _durationText, value);
+        get;
+        set => SetProperty(ref field, value);
     }
-
-    private bool _isDirectory;
 
     /// <summary>
     ///     Indicates whether this item represents a directory or a file.
@@ -185,11 +165,9 @@ public class FileSystemItem : INotifyPropertyChanged
     /// </remarks>
     public bool IsDirectory
     {
-        get => _isDirectory;
-        set => SetProperty(ref _isDirectory, value);
+        get;
+        set => SetProperty(ref field, value);
     }
-
-    private ObservableCollection<FileSystemItem> _children;
 
     /// <summary>
     ///     Children collection is null for files and non-null for directories to make UI templates simpler.
@@ -201,11 +179,9 @@ public class FileSystemItem : INotifyPropertyChanged
     /// </remarks>
     public ObservableCollection<FileSystemItem> Children
     {
-        get => _children;
-        set => SetProperty(ref _children, value);
+        get;
+        set => SetProperty(ref field, value);
     }
-
-    private bool _isExpanded;
 
     /// <summary>
     ///     Whether the directory is currently expanded in the UI tree.
@@ -216,10 +192,10 @@ public class FileSystemItem : INotifyPropertyChanged
     /// </remarks>
     public bool IsExpanded
     {
-        get => _isExpanded;
+        get;
         set
         {
-            if (SetProperty(ref _isExpanded, value) && value)
+            if (SetProperty(ref field, value) && value)
             {
                 // Fire expansion callback so consumers (e.g. view-model) can perform lazy-loading.
                 OnExpanded?.Invoke(this);
